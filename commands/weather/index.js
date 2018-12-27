@@ -4,36 +4,45 @@ const chalk = require('chalk');
 
 class Weather {
   constructor() {
-    this.location = 'Glendale';
+    this.modifier = 'zip';
+    this.location = '91203';
     this.questions = [
       {
         type : 'input',
         name : 'location',
-        message : 'Enter City (default: Glendale) ...'
+        message : 'Enter City or Zip Code (default: Glendale) ...'
       }
     ];
   }
 
   init() {
+    let modifier = this.modifier;
     let location = this.location;
     let questions = this.questions;
-    this.getWeather(location, questions);
+    this.getWeather(modifier, location, questions);
   }
 
-  getWeather(location, questions) {
+  getWeather(modifier, location, questions) {
     prompt(questions)
     .then(answers => {
-      location = answers.location ? answers.location : 'Glendale';
-      axios.get(`http://api.openweathermap.org/data/2.5/weather?q=${location}&APPID=${process.env.OWM_API_KEY}&units=imperial`)
+      let loc = answers.location;
+      console.log(loc)
+      location = loc ? loc : location;
+      modifier = isNaN(location) ? 'q' : modifier;
+
+      axios.get(`http://api.openweathermap.org/data/2.5/weather?${modifier}=${location}&APPID=${process.env.OWM_API_KEY}&units=imperial`)
       .then( res => {
         let string =
         `
           \n${chalk.grey('=================================================================================')}
-          \nThe temperature in ${chalk.green(location)} is ${chalk.yellow(res.data.main.temp)}°F and ${chalk.cyan(res.data.weather[0].description)} today.
+          \nThe temperature in ${chalk.green(res.data.name)} is ${chalk.yellow(res.data.main.temp)}°F and ${chalk.cyan(res.data.weather[0].description)} today.
           \n${chalk.grey('=================================================================================')}
           \n
         `;
         console.log(string);
+      })
+      .catch(e => {
+        console.log(e);
       });
     });
   }
