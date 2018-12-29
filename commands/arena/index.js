@@ -1,13 +1,14 @@
 const { prompt } = require('inquirer');
 const axios = require('axios');
 const querystring = require('querystring');
+const fs = require('fs');
 const chalk = require('chalk');
 
 class Arena {
   constructor() {
     this.client_id = process.env.WOW_CLIENT_ID;
     this.client_secret = process.env.WOW_CLIENT_SECRET;
-    this.tokenObj;
+    this.tokenObj = {};
     this.expirationTime;
     this.questions = [
       {
@@ -36,8 +37,15 @@ class Arena {
     // set default values for character and realm
     await this._setDefaultInput();
 
-    // grab token object
-    this.tokenObj = await this.getToken(this.client_id, this.client_secret);
+    // check token to see if still valid
+    let tokenValid = await this._checkToken();
+    if (!tokenValid) {
+      // grab token object
+      this.tokenObj = await this.getToken(this.client_id, this.client_secret);
+
+      // set token
+      await this._writeToken();
+    }
 
     // made api call for arena record
     let data = await this.getArenaData(this.tokenObj.access_token, this.character, this.realm);
@@ -46,6 +54,27 @@ class Arena {
     let result = await this._formatArenaData(data);
 
     console.log(result);
+  }
+
+  _checkToken() {
+    if (fs.existsSync(__dirname + '/token.json')) {
+      this.tokenObj = JSON.parse(fs.readFileSync(__dirname + '/token.json'))
+      let date = new Date();
+      if (date.getTime() < this.tokenObj.expDate) {
+        return true;
+      }
+      return false
+    }
+    return false;
+  }
+
+  _writeToken() {
+    let date = new Date();
+    let expDate = date.getTime() + (this.tokenObj.expires_in * 1000)
+    this.tokenObj.expDate = expDate;
+    fs.writeFile(__dirname + '/token.json', JSON.stringify(this.tokenObj), err => {
+      if (err) console.log(err)
+    })
   }
 
   getToken(id, secret) {
@@ -58,19 +87,24 @@ class Arena {
       return res.data;
     })
     .catch(e => {
-      console.log(e)
+      console.log(e);
     })
     return token;
   }
 
   getArenaData(token, character, realm) {
-    let data = axios.get(`https://us.api.blizzard.com/wow/character/${realm}/${character}?fields=pvp&access_token=${token}`)
-      .then(res => {
-        return res.data.pvp.brackets;
-      })
-      .catch(e => {
-        console.log(e);
-      })
+    let data = axios.get(`https://us.api.blizzard.com/wow/character/${realm}/${character}`, {
+      params: {
+        fields: 'pvp',
+        access_token: token
+      }
+    })
+    .then(res => {
+      return res.data.pvp.brackets;
+    })
+    .catch(e => {
+      console.log(e);
+    })
     return data;
   }
 
