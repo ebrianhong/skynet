@@ -4,7 +4,7 @@ const chalk = require('chalk');
 
 class Weather {
   static get commandName() {
-    return 'arena';
+    return 'weather';
   }
 
   static get commandDescription() {
