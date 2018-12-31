@@ -3,6 +3,18 @@ const axios = require('axios');
 const chalk = require('chalk');
 
 class Weather {
+  static get commandName() {
+    return 'arena';
+  }
+
+  static get commandDescription() {
+    return 'get weather';
+  }
+
+  static get commandAlias() {
+    return 'w';
+  }
+
   constructor() {
     this.modifier = 'zip';
     this.location = '91203';

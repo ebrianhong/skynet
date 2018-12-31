@@ -5,6 +5,19 @@ const fs = require('fs');
 const chalk = require('chalk');
 
 class Arena {
+  static get commandName() {
+    return 'arena';
+  }
+
+  static get commandDescription() {
+    return 'get arena ratings';
+  }
+
+  static get commandAlias() {
+    return 'a';
+  }
+
+
   constructor() {
     this.client_id = process.env.WOW_CLIENT_ID;
     this.client_secret = process.env.WOW_CLIENT_SECRET;
