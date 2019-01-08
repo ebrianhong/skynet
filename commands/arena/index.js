@@ -122,7 +122,7 @@ class Arena {
   }
 
   _setDefaultInput() {
-    this.character = this.character ? this.character : 'quippy';
+    this.character = this.character ? this.character : 'qoda';
     this.realm = this.realm ? this.realm : 'kil\'jaeden';
   }
 
