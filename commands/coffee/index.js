@@ -39,7 +39,7 @@ class Coffee {
         `
       coffeetime = chalk[color](string);
     } else {
-      console.log('coffee time is over :(\n')
+      coffeetime = chalk.white('coffee time is over :(\n')
     }
     console.log(chalk.yellow('\nIs it coffee time?\n'))
     console.log(coffeetime)
